@@ -38,8 +38,13 @@ xcirc = distancia_max * cos(0:pi/50:2*pi) + Xteorica(1,1);
 ycirc = distancia_max * sin(0:pi/50:2*pi) + Xteorica(1,2);
 
 % Creación de los vectores
-x = rand(swarmsize, dimension); % vector posicion (swarmsize filas y pos columnas)
+%x = rand(swarmsize, dimension); % vector posicion (swarmsize filas y pos columnas)
+x(:,1) = min_lim_x + (max_lim_x-min_lim_x).*rand(swarmsize,1);
+x(:,2) = min_lim_y + (max_lim_y-min_lim_y).*rand(swarmsize,1);
 v = rand(swarmsize, dimension); % vector aceleración
+
+x_ini = x;
+v_ini = v;
 
 % valores óptimos en la primera generación
 cost = costFunction2(x);
@@ -51,8 +56,8 @@ localp = x;
 globalp=x(indx,:);
 
 % Parámetros a variar
-c1 = 1;
-c2 = 1; 
+c1 = 2;
+c2 = 2; 
 K = 0.8;
 funcion_w = 'lineal';
 
@@ -65,7 +70,7 @@ while (gen < maxgen)
         w = (maxgen-gen)/maxgen;
     elseif strcmp(funcion_w,'exp')
         w = exp(-1*(1-(maxgen-gen)/maxgen));
-    else strcmp(funcion_w,'constante')
+    elseif strcmp(funcion_w,'constante')
         w = 1.1;
     end
     
