@@ -18,7 +18,7 @@ min_lim_x = -2;
 max_lim_y = 2;
 min_lim_y = -2;
 
-porcentaje_error = 5/100;
+porcentaje_error = 1/100;
 
 % Para verificar porcentaje de error    
 distancias = zeros(swarmsize, 1); % Init del array con las distancias de cada partícula a la solución
@@ -56,10 +56,9 @@ localp = x;
 globalp=x(indx,:);
 
 % Parámetros a variar
-c1 = 0:0.1:4;
-c2 = 0:0.1:4; 
+c1 = 0.1;
+c2 = 0.9; 
 K = 1;
-funcion_w = 'constante';
 
 %% fase 2: loop
 
@@ -72,32 +71,33 @@ lim_sup_c1 = lim_sup_c2;
 step_c1 = step_c2;
 
 % Creación de la celda con sus encabezados
-% El tamaño de la celda en este caso solo fue definido por el tamaño de los
-% límites de c2. Si es necesario que no sea una matriz cuadrada hay que
-% modificar el código.
 
-celda = cell((lim_sup_c2-lim_inf_c2)/step_c2+2);
+max_corridas = 100;
+celda = cell(max_corridas+1,4);
+celda{1,2} = 'lineal';
+celda{1,3} = 'exp';
+celda{1,4} = 'constante';
 contc1 = 2;
-for c2 = lim_inf_c2:step_c2:lim_sup_c2
-    celda{1,contc1} = num2str(c2);
-    celda{contc1,1} = num2str(c2);
+
+for val = 1:1:max_corridas
+    celda{contc1,1} = num2str(val);
     contc1 = contc1 + 1;
 end
 
 contc1 = 2;
 contc2 = 2;
-for c1= lim_inf_c1:step_c1:lim_sup_c1
-    for c2 = lim_inf_c2:step_c2:lim_sup_c2
+for corridas = 2:1:max_corridas+1
+    for funcion_w = [1 2 3]
         
         while (gen < maxgen)
             
             gen = gen + 1;
             
-            if strcmp(funcion_w,'lineal')
+            if funcion_w == 1
                 w = (maxgen-gen)/maxgen;
-            elseif strcmp(funcion_w,'exp')
+            elseif funcion_w == 2
                 w = exp(-1*(1-(maxgen-gen)/maxgen));
-            elseif strcmp(funcion_w,'constante')
+            elseif funcion_w == 3
                 w = 1;
             end
             
@@ -151,13 +151,22 @@ for c1= lim_inf_c1:step_c1:lim_sup_c1
         localp = x;
         [globalbest, indx] = min(cost);
         globalp=x(indx,:);
-
-        celda{contc2,contc1} = cumplen_porcentaje_error;
-        contc2 = contc2 +1;
+        
+        celda{corridas,contc2} = cumplen_porcentaje_error;
+        contc2 = contc2 + 1;
+        
     end
     contc2 = 2;
-    contc1 = contc1 + 1;
+    
+    x(:,1) = min_lim_x + (max_lim_x-min_lim_x).*rand(swarmsize,1);
+    x(:,2) = min_lim_y + (max_lim_y-min_lim_y).*rand(swarmsize,1);
+    v = rand(swarmsize, dimension); % vector aceleración
+    
+    x_ini = x;
+    v_ini = v;
+    
 end
+%%
 
 
 
