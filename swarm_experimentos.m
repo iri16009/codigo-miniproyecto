@@ -11,7 +11,7 @@
 swarmsize = 10; % tamaño de la población (swarm)
 dimension = 2;  % Dimensión del espacio de búsqueda
 gen = 0;        % Iteración inicial
-maxgen = 500;    % Máximo número de iteraciones
+maxgen = 100;    % Máximo número de iteraciones
 
 max_lim_x = 2;  % Límites del área de búsqueda
 min_lim_x = -2;
@@ -56,9 +56,10 @@ localp = x;
 globalp=x(indx,:);
 
 % Parámetros a variar
-c1 = 0.1;
-c2 = 0.9; 
+c1 = 0:0.1:4;
+c2 = 0:0.1:4; 
 K = 1;
+funcion_w = 'lineal';
 
 %% fase 2: loop
 
@@ -71,33 +72,32 @@ lim_sup_c1 = lim_sup_c2;
 step_c1 = step_c2;
 
 % Creación de la celda con sus encabezados
+% El tamaño de la celda en este caso solo fue definido por el tamaño de los
+% límites de c2. Si es necesario que no sea una matriz cuadrada hay que
+% modificar el código.
 
-max_corridas = 100;
-celda = cell(max_corridas+1,4);
-celda{1,2} = 'lineal';
-celda{1,3} = 'exp';
-celda{1,4} = 'constante';
+celda = cell((lim_sup_c2-lim_inf_c2)/step_c2+2);
 contc1 = 2;
-
-for val = 1:1:max_corridas
-    celda{contc1,1} = num2str(val);
+for c2 = lim_inf_c2:step_c2:lim_sup_c2
+    celda{1,contc1} = num2str(c2);
+    celda{contc1,1} = num2str(c2);
     contc1 = contc1 + 1;
 end
 
 contc1 = 2;
 contc2 = 2;
-for corridas = 2:1:max_corridas+1
-    for funcion_w = [1 2 3]
+for c1= lim_inf_c1:step_c1:lim_sup_c1
+    for c2 = lim_inf_c2:step_c2:lim_sup_c2
         
         while (gen < maxgen)
             
             gen = gen + 1;
             
-            if funcion_w == 1
+            if strcmp(funcion_w,'lineal')
                 w = (maxgen-gen)/maxgen;
-            elseif funcion_w == 2
+            elseif strcmp(funcion_w,'exp')
                 w = exp(-1*(1-(maxgen-gen)/maxgen));
-            elseif funcion_w == 3
+            elseif strcmp(funcion_w,'constante')
                 w = 1;
             end
             
@@ -151,22 +151,37 @@ for corridas = 2:1:max_corridas+1
         localp = x;
         [globalbest, indx] = min(cost);
         globalp=x(indx,:);
-        
-        celda{corridas,contc2} = cumplen_porcentaje_error;
-        contc2 = contc2 + 1;
-        
+
+        celda{contc2,contc1} = cumplen_porcentaje_error;
+        contc2 = contc2 +1;
     end
     contc2 = 2;
-    
-    x(:,1) = min_lim_x + (max_lim_x-min_lim_x).*rand(swarmsize,1);
-    x(:,2) = min_lim_y + (max_lim_y-min_lim_y).*rand(swarmsize,1);
-    v = rand(swarmsize, dimension); % vector aceleración
-    
-    x_ini = x;
-    v_ini = v;
-    
+    contc1 = contc1 + 1;
 end
-%%
+%% Comparación de resultados
+
+sumaceldas = cell((lim_sup_c2-lim_inf_c2)/step_c2+2);
+contc1 = 2;
+for c2 = lim_inf_c2:step_c2:lim_sup_c2
+    sumaceldas{1,contc1} = num2str(c2);
+    sumaceldas{contc1,1} = num2str(c2);
+    contc1 = contc1 + 1;
+end
+contc1 = 2;
+contc2 = 2;
+for c1= lim_inf_c1:step_c1:lim_sup_c1
+    for c2 = lim_inf_c2:step_c2:lim_sup_c2
+        sumaceldas{contc2,contc1} = celda1{contc2,contc1} + celda2{contc2,contc1} + celda3{contc2,contc1}...
+            + celda4{contc2,contc1} + celda5{contc2,contc1} + celda6{contc2,contc1} + celda7{contc2,contc1}...
+            + celda8{contc2,contc1} + celda9{contc2,contc1} + celda10{contc2,contc1}+ celda11{contc2,contc1}...
+            + celda12{contc2,contc1}+ celda13{contc2,contc1}+ celda14{contc2,contc1}+ celda15{contc2,contc1}...
+            + celda16{contc2,contc1}+ celda17{contc2,contc1}+ celda18{contc2,contc1}+ celda19{contc2,contc1}...
+            + celda20{contc2,contc1};
+        contc2 = contc2 + 1;
+    end
+    contc2 = 2;
+    contc1 = contc1 + 1;
+end
 
 
 
