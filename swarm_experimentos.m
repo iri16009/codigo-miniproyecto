@@ -18,6 +18,8 @@ min_lim_x = -2;
 max_lim_y = 2;
 min_lim_y = -2;
 
+max_v = (max_lim_x-min_lim_x)/5;
+
 porcentaje_error = 1/100;
 
 % Para verificar porcentaje de error    
@@ -56,11 +58,13 @@ localp = x;
 globalp=x(indx,:);
 
 % Parámetros a variar
-c1 = 0:0.1:4;
-c2 = 0:0.1:4; 
-K = 1;
+phi1 = 2.05;
+phi2 = 2.05; 
+phi = phi1 + phi2;
+K = 2/abs(2-phi-sqrt(phi^2-4*phi));
+c1 = phi1*K;
+c2 = phi2*K;
 funcion_w = 'lineal';
-
 %% fase 2: loop
 
 % PARÁMETROS
@@ -76,25 +80,27 @@ step_c1 = step_c2;
 % límites de c2. Si es necesario que no sea una matriz cuadrada hay que
 % modificar el código.
 
-celda = cell((lim_sup_c2-lim_inf_c2)/step_c2+2);
-contc1 = 2;
-for c2 = lim_inf_c2:step_c2:lim_sup_c2
-    celda{1,contc1} = num2str(c2);
-    celda{contc1,1} = num2str(c2);
-    contc1 = contc1 + 1;
-end
+celda = cell(41);
+cont_c1 = 2;
+cont_c2 = 2;
+corridas = 100;
 
-contc1 = 2;
-contc2 = 2;
-for c1= lim_inf_c1:step_c1:lim_sup_c1
-    for c2 = lim_inf_c2:step_c2:lim_sup_c2
+for corrida = 1:1:20
+for phi1= 0.1:0.1:4
+    
+    for phi2= 0.1:0.1:4
+        
+        phi = phi1 + phi2;
+        K = 2/abs(2-phi-sqrt(phi^2-4*phi));
+        c1 = phi1*K;
+        c2 = phi2*K;
         
         while (gen < maxgen)
             
             gen = gen + 1;
             
             if strcmp(funcion_w,'lineal')
-                w = (maxgen-gen)/maxgen;
+                w = -0.5/maxgen + 0.9;%(maxgen-gen)/maxgen;
             elseif strcmp(funcion_w,'exp')
                 w = exp(-1*(1-(maxgen-gen)/maxgen));
             elseif strcmp(funcion_w,'constante')
@@ -106,9 +112,20 @@ for c1= lim_inf_c1:step_c1:lim_sup_c1
             
             v = K.*(w.*v+c1.*r1.*(localp-x)+c2.*r2.*(ones(swarmsize, 1)*globalp-x));
             
-            x = x+v;
+            % Clamping de la velocidad
+            overlimitvx = v(:,1) <= max_v;
+            underlimitvx = v(:,1) >= -1*max_v;
+            v(:,1) = v(:,1).*overlimitvx + not(overlimitvx)*max_v;
+            v(:,1) = v(:,1).*underlimitvx + not(underlimitvx)*-1*max_v;
             
-            % Encontrar nada más el máximo entre -10 y 10 porque la función oscila.
+            overlimitvy = v(:,2) <= max_v;
+            underlimitvy = v(:,2)>=-1*max_v;
+            v(:,2) = v(:,2).*overlimitvy + not(overlimitvy)*max_v;
+            v(:,2) = v(:,2).*underlimitvy + not(underlimitvy)*-1*max_v;
+            
+            x = x + v;
+            
+            % Clamping de la posición
             overlimitx = x(:,1) <= max_lim_x;
             underlimitx = x(:,1) >= min_lim_x;
             x(:,1) = x(:,1).*overlimitx + not(overlimitx)*max_lim_x;
@@ -143,45 +160,61 @@ for c1= lim_inf_c1:step_c1:lim_sup_c1
                 cumplen_porcentaje_error = cumplen_porcentaje_error + 1;
             end
         end
-        gen = 0;
-        x = x_ini;
-        v = v_ini;
+        
+        celda{cont_c2,cont_c1}(corrida) = cumplen_porcentaje_error;
+        x=x_ini;
+        v=v_ini;
         cost = costFunction2(x);
         localbest = cost;
         localp = x;
         [globalbest, indx] = min(cost);
         globalp=x(indx,:);
-
-        celda{contc2,contc1} = cumplen_porcentaje_error;
-        contc2 = contc2 +1;
+        gen = 0;
+        cont_c2 = cont_c2 +1;
     end
-    contc2 = 2;
-    contc1 = contc1 + 1;
+    cont_c2 = 2;
+    cont_c1 = cont_c1 + 1;
 end
+cont_c1 = 2;
+end
+
+
 %% Comparación de resultados
 
-sumaceldas = cell((lim_sup_c2-lim_inf_c2)/step_c2+2);
-contc1 = 2;
-for c2 = lim_inf_c2:step_c2:lim_sup_c2
-    sumaceldas{1,contc1} = num2str(c2);
-    sumaceldas{contc1,1} = num2str(c2);
-    contc1 = contc1 + 1;
-end
-contc1 = 2;
-contc2 = 2;
-for c1= lim_inf_c1:step_c1:lim_sup_c1
-    for c2 = lim_inf_c2:step_c2:lim_sup_c2
-        sumaceldas{contc2,contc1} = celda1{contc2,contc1} + celda2{contc2,contc1} + celda3{contc2,contc1}...
-            + celda4{contc2,contc1} + celda5{contc2,contc1} + celda6{contc2,contc1} + celda7{contc2,contc1}...
-            + celda8{contc2,contc1} + celda9{contc2,contc1} + celda10{contc2,contc1}+ celda11{contc2,contc1}...
-            + celda12{contc2,contc1}+ celda13{contc2,contc1}+ celda14{contc2,contc1}+ celda15{contc2,contc1}...
-            + celda16{contc2,contc1}+ celda17{contc2,contc1}+ celda18{contc2,contc1}+ celda19{contc2,contc1}...
-            + celda20{contc2,contc1};
-        contc2 = contc2 + 1;
+promedio = cell(41);
+for phi1= 2:1:41
+    for phi2= 2:1:41
+        %for corrida = 1:1:20
+             promedio{phi2,phi1} = mean(celda{phi2,phi1});
+        %end
     end
-    contc2 = 2;
-    contc1 = contc1 + 1;
 end
+
+
+
+
+% sumaceldas = cell((lim_sup_c2-lim_inf_c2)/step_c2+2);
+% contc1 = 2;
+% for c2 = lim_inf_c2:step_c2:lim_sup_c2
+%     sumaceldas{1,contc1} = num2str(c2);
+%     sumaceldas{contc1,1} = num2str(c2);
+%     contc1 = contc1 + 1;
+% end
+% contc1 = 2;
+% contc2 = 2;
+% for c1= lim_inf_c1:step_c1:lim_sup_c1
+%     for c2 = lim_inf_c2:step_c2:lim_sup_c2
+%         sumaceldas{contc2,contc1} = celda1{contc2,contc1} + celda2{contc2,contc1} + celda3{contc2,contc1}...
+%             + celda4{contc2,contc1} + celda5{contc2,contc1} + celda6{contc2,contc1} + celda7{contc2,contc1}...
+%             + celda8{contc2,contc1} + celda9{contc2,contc1} + celda10{contc2,contc1}+ celda11{contc2,contc1}...
+%             + celda12{contc2,contc1}+ celda13{contc2,contc1}+ celda14{contc2,contc1}+ celda15{contc2,contc1}...
+%             + celda16{contc2,contc1}+ celda17{contc2,contc1}+ celda18{contc2,contc1}+ celda19{contc2,contc1}...
+%             + celda20{contc2,contc1};
+%         contc2 = contc2 + 1;
+%     end
+%     contc2 = 2;
+%     contc1 = contc1 + 1;
+% end
 
 
 

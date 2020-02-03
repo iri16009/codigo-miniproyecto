@@ -11,12 +11,14 @@
 swarmsize = 10; % tamaño de la población (swarm)
 dimension = 2;  % Dimensión del espacio de búsqueda
 gen = 0;        % Iteración inicial
-maxgen = 70;    % Máximo número de iteraciones
+maxgen = 100;    % Máximo número de iteraciones
 
 max_lim_x = 2;  % Límites del área de búsqueda
 min_lim_x = -2;
 max_lim_y = 2;
 min_lim_y = -2;
+
+max_v = (max_lim_x-min_lim_x)/5;
 
 porcentaje_error = 1/100;
 
@@ -56,9 +58,14 @@ localp = x;
 globalp=x(indx,:);
 
 % Parámetros a variar
-c1 = 2;
-c2 = 2; 
-K = 0.8;
+phi1 = 0.4;
+phi2 = 3.7; 
+phi = phi1 + phi2;
+K = 2/abs(2-phi-sqrt(phi^2-4*phi));
+w = K;
+w_damp = 1;
+c1 = phi1*K;
+c2 = phi2*K;
 funcion_w = 'lineal';
 
 %% fase 2: loop
@@ -67,21 +74,32 @@ while (gen < maxgen)
     gen = gen + 1;
     
     if strcmp(funcion_w,'lineal')
-        w = (maxgen-gen)/maxgen;
+        w = -0.5/maxgen + 0.9;%(maxgen-gen)/maxgen;
     elseif strcmp(funcion_w,'exp')
         w = exp(-1*(1-(maxgen-gen)/maxgen));
     elseif strcmp(funcion_w,'constante')
-        w = 1.1;
+        w = 1;
     end
-    
+
     r1 = rand(swarmsize, dimension);% Se cambia en cada iteracion?
     r2 = rand(swarmsize, dimension);
 
     v = K.*(w.*v+c1.*r1.*(localp-x)+c2.*r2.*(ones(swarmsize, 1)*globalp-x));
     
+    % Clamping de la velocidad
+    overlimitvx = v(:,1) <= max_v;
+    underlimitvx = v(:,1) >= -1*max_v;
+    v(:,1) = v(:,1).*overlimitvx + not(overlimitvx)*max_v;
+    v(:,1) = v(:,1).*underlimitvx + not(underlimitvx)*-1*max_v;
+    
+    overlimitvy = v(:,2) <= max_v;
+    underlimitvy = v(:,2)>=-1*max_v;
+    v(:,2) = v(:,2).*overlimitvy + not(overlimitvy)*max_v;
+    v(:,2) = v(:,2).*underlimitvy + not(underlimitvy)*-1*max_v;
+    
     x = x+v;
     
-    % Encontrar nada más el máximo entre -10 y 10 porque la función oscila.
+    % Clamping de la posición
     overlimitx = x(:,1) <= max_lim_x;
     underlimitx = x(:,1) >= min_lim_x;
     x(:,1) = x(:,1).*overlimitx + not(overlimitx)*max_lim_x;
@@ -115,7 +133,7 @@ while (gen < maxgen)
     scatter(x(:,1), x(:,2),20,'filled', 'k');
     hold on
     plot(xcirc, ycirc,'k--');
-    mytitleText = ['c_1= ',num2str(c1),' c_2 = ', num2str(c2),' K = ', num2str(K)];
+    mytitleText = ['$\phi _1$= ',num2str(phi1),' $\phi _2$ = ', num2str(phi2),' K = ', num2str(K), ' w = ', funcion_w];
     title(mytitleText,'Interpreter','tex' );
     contour(X,Y,Z,50)
     scatter(1, 1,80, 'r','x','LineWidth',1.5);
