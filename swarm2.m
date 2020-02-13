@@ -1,18 +1,25 @@
 % Código elaborado con base en el curso
 % "Robótica y optimización inteligente con Octave o Matlab"
-% de Udemy 
+% de Udemy
 % Diseño e Innovación 1
 % Gabriela Iriarte Colmenares
 % 16009
 
 %% fase 1: init
 % Parámetros fijos por el usuario
+% La función de costo puede ser:
+% "Banana"
+% "Ackley"
+% "Rastrigin"
+% "Peaks"
+
+funcion_costo = "Rastrigin";
 
 swarmsize = 10; % tamaño de la población (swarm)
 dimension = 2;  % Dimensión del espacio de búsqueda
 gen = 0;        % Iteración inicial
-maxgen = 100;    % Máximo número de iteraciones
-
+maxgen = 60;    % Máximo número de iteraciones
+g = goal(funcion_costo);
 max_lim_x = 2;  % Límites del área de búsqueda
 min_lim_x = -2;
 max_lim_y = 2;
@@ -22,9 +29,9 @@ max_v = (max_lim_x-min_lim_x)/5;
 
 porcentaje_error = 1/100;
 
-% Para verificar porcentaje de error    
+% Para verificar porcentaje de error
 distancias = zeros(swarmsize, 1); % Init del array con las distancias de cada partícula a la solución
-Xteorica = [1 1; 0 0]; % Solución (primera fila x,y)
+Xteorica = [g; 0 0]; % Solución (primera fila x,y)
 search_area = (max_lim_x-min_lim_x)*(max_lim_y-min_lim_y);
 distancia_max = sqrt(search_area*porcentaje_error/pi);
 
@@ -32,8 +39,7 @@ distancia_max = sqrt(search_area*porcentaje_error/pi);
 coste = zeros(1,gen);
 
 % Para graficar la superficie y el contour
-[X,Y] = meshgrid(-2:0.1:2);
-Z = 100*(Y-X.^2).^2+(ones(size(X))-X).^2;
+[X,Y,Z] = PSO_contour(funcion_costo);
 
 % Para graficar el círculo delimitador de soluciones
 xcirc = distancia_max * cos(0:pi/50:2*pi) + Xteorica(1,1);
@@ -49,7 +55,7 @@ x_ini = x;
 v_ini = v;
 
 % valores óptimos en la primera generación
-cost = costFunction2(x);
+cost = costFunction2(x,funcion_costo);
 
 localbest = cost;
 localp = x;
@@ -59,11 +65,9 @@ globalp=x(indx,:);
 
 % Parámetros a variar
 phi1 = 0.4;
-phi2 = 3.7; 
+phi2 = 3.7;
 phi = phi1 + phi2;
 K = 2/abs(2-phi-sqrt(phi^2-4*phi));
-w = K;
-w_damp = 1;
 c1 = phi1*K;
 c2 = phi2*K;
 funcion_w = 'lineal';
@@ -80,10 +84,10 @@ while (gen < maxgen)
     elseif strcmp(funcion_w,'constante')
         w = 1;
     end
-
+    
     r1 = rand(swarmsize, dimension);% Se cambia en cada iteracion?
     r2 = rand(swarmsize, dimension);
-
+    
     v = K.*(w.*v+c1.*r1.*(localp-x)+c2.*r2.*(ones(swarmsize, 1)*globalp-x));
     
     % Clamping de la velocidad
@@ -110,17 +114,17 @@ while (gen < maxgen)
     x(:,2) = x(:,2).*overlimity + not(overlimity)*max_lim_y;
     x(:,2) = x(:,2).*underlimity + not(underlimity)*min_lim_y;
     
-    cost = costFunction2(x);
+    cost = costFunction2(x,funcion_costo);
     
     bestcost = cost < localbest;
     localbest = localbest.*not(bestcost)+cost.*bestcost;
-    localp(bestcost,:) = x(bestcost,:); 
-
+    localp(bestcost,:) = x(bestcost,:);
+    
     [new_globalbest, indx] = min(localbest);
     
     if new_globalbest < globalbest
-     globalp = x(indx,:);
-     globalbest = new_globalbest;
+        globalp = x(indx,:);
+        globalbest = new_globalbest;
     end
     
     coste(1,gen) = globalbest;
@@ -133,10 +137,10 @@ while (gen < maxgen)
     scatter(x(:,1), x(:,2),20,'filled', 'k');
     hold on
     plot(xcirc, ycirc,'k--');
-    mytitleText = ['$\phi _1$= ',num2str(phi1),' $\phi _2$ = ', num2str(phi2),' K = ', num2str(K), ' w = ', funcion_w];
+    mytitleText = ['\phi _1= ',num2str(phi1),' \phi _2 = ', num2str(phi2),' K = ', num2str(K), ' w = ', funcion_w];
     title(mytitleText,'Interpreter','tex' );
     contour(X,Y,Z,50)
-    scatter(1, 1,80, 'r','x','LineWidth',1.5);
+    scatter(g(1), g(2),80, 'r','x','LineWidth',1.5);
     hold off
     drawnow;
     pause(0.1);
