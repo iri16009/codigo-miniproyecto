@@ -12,18 +12,29 @@
 % "Ackley"
 % "Rastrigin"
 % "Peaks"
+% "Booth"
 
-funcion_costo = "Rastrigin";
+funcion_costo = "Ackley";
 
 swarmsize = 10; % tamaño de la población (swarm)
 dimension = 2;  % Dimensión del espacio de búsqueda
 gen = 0;        % Iteración inicial
 maxgen = 60;    % Máximo número de iteraciones
 g = goal(funcion_costo);
-max_lim_x = 2;  % Límites del área de búsqueda
-min_lim_x = -2;
-max_lim_y = 2;
-min_lim_y = -2;
+
+if (funcion_costo == "Booth")
+    max_lim_x = 4;  % Límites del área de búsqueda
+    min_lim_x = -4;
+    max_lim_y = 4;
+    min_lim_y = -4;
+else
+    max_lim_x = 2;  % Límites del área de búsqueda
+    min_lim_x = -2;
+    max_lim_y = 2;
+    min_lim_y = -2;
+end
+
+
 
 max_v = (max_lim_x-min_lim_x)/5;
 
@@ -144,6 +155,8 @@ while (gen < maxgen)
     hold off
     drawnow;
     pause(0.1);
+    filename = sprintf('Ackley_img_%d.jpg', gen) ;
+    saveas(gcf, filename, 'png')
 end
 
 

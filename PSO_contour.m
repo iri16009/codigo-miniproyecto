@@ -24,5 +24,8 @@ elseif (funcion_costo == "Rastrigin")
 elseif (funcion_costo == "Peaks")
     [X1,Y1] = meshgrid(-2:0.1:2);
     Z = peaks(X1,Y1);
+elseif (funcion_costo == "Booth")
+    [X1,Y1] = meshgrid(-4:0.1:4);
+    Z=(X1 + 2*Y1-7).^2 + (2*X1+Y1-5).^2;
 end
 end

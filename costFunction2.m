@@ -18,6 +18,8 @@ elseif (funcion_costo == "Rastrigin")
     cost = 20+(restado(:,1)+restado(:,2));
 elseif (funcion_costo == "Peaks")
     cost = peaks(x(:,1),x(:,2));
+elseif (funcion_costo == "Booth")
+    cost=(x(:,1) + 2*x(:,2)-7).^2 + (2*x(:,1)+x(:,2)-5).^2;
 end
 
 

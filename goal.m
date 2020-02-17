@@ -8,6 +8,8 @@ function g = goal(funcion_costo)
         g = [0 0];
     elseif (funcion_costo == "Peaks")
         g = [0.2283 -1.626];
+    elseif (funcion_costo == "Booth")
+        g = [1 3];
     end
 
 end
