@@ -10,6 +10,8 @@ function g = goal(funcion_costo)
         g = [0.2283 -1.626];
     elseif (funcion_costo == "Booth")
         g = [1 3];
+    elseif (funcion_costo == "APF")
+        g = [4 6];
     end
 
 end

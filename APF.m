@@ -1,4 +1,4 @@
-%% Prueba del Artificial Potential Field (APT)
+%% Prueba del Artificial Potential Field (APF)
 % Gabriela Iriarte
 % 11/02/2020
 

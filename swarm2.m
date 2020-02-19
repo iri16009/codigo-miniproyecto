@@ -14,9 +14,9 @@
 % "Peaks"
 % "Booth"
 
-funcion_costo = "Ackley";
+funcion_costo = "APF";
 
-swarmsize = 10; % tamaño de la población (swarm)
+swarmsize = 100; % tamaño de la población (swarm)
 dimension = 2;  % Dimensión del espacio de búsqueda
 gen = 0;        % Iteración inicial
 maxgen = 60;    % Máximo número de iteraciones
@@ -27,6 +27,11 @@ if (funcion_costo == "Booth")
     min_lim_x = -4;
     max_lim_y = 4;
     min_lim_y = -4;
+elseif (funcion_costo == "APF")
+    max_lim_x = 20;  % Límites del área de búsqueda
+    min_lim_x = 1;
+    max_lim_y = 20;
+    min_lim_y = 1;
 else
     max_lim_x = 2;  % Límites del área de búsqueda
     min_lim_x = -2;
@@ -60,6 +65,7 @@ ycirc = distancia_max * sin(0:pi/50:2*pi) + Xteorica(1,2);
 %x = rand(swarmsize, dimension); % vector posicion (swarmsize filas y pos columnas)
 x(:,1) = min_lim_x + (max_lim_x-min_lim_x).*rand(swarmsize,1);
 x(:,2) = min_lim_y + (max_lim_y-min_lim_y).*rand(swarmsize,1);
+x = ones(100,2).*18;
 v = rand(swarmsize, dimension); % vector aceleración
 
 x_ini = x;
@@ -145,18 +151,20 @@ while (gen < maxgen)
     subplot(1,2,1);
     plot(coste(1:gen),'r'),grid on,xlabel('Number of generation'),ylabel('Global cost'),title('Parameter identification of nonlinear dynamic systems');
     subplot(1,2,2);
-    scatter(x(:,1), x(:,2),20,'filled', 'k');
+    %scatter(x(:,1), x(:,2),20,'filled', 'k');
+    scatter3(x(:,1), x(:,2),cost,20,'filled', 'k');
     hold on
-    plot(xcirc, ycirc,'k--');
+    %plot(xcirc, ycirc,'k--');
     mytitleText = ['\phi _1= ',num2str(phi1),' \phi _2 = ', num2str(phi2),' K = ', num2str(K), ' w = ', funcion_w];
     title(mytitleText,'Interpreter','tex' );
-    contour(X,Y,Z,50)
-    scatter(g(1), g(2),80, 'r','x','LineWidth',1.5);
+    %contour(X,Y,Z,50)
+    surf(X,Y,Z);
+    %scatter(g(1), g(2),80, 'r','x','LineWidth',1.5);
     hold off
     drawnow;
     pause(0.1);
-    filename = sprintf('Ackley_img_%d.jpg', gen) ;
-    saveas(gcf, filename, 'png')
+    filename = sprintf('Banana_img_%d.jpg', gen) ;
+    %saveas(gcf, filename, 'png')
 end
 
 
