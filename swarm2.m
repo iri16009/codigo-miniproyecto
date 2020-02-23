@@ -163,7 +163,7 @@ while (gen < maxgen)
     hold off
     drawnow;
     pause(0.1);
-    filename = sprintf('Banana_img_%d.jpg', gen) ;
+    filename = sprintf('APF_img_%d.jpg', gen) ;
     %saveas(gcf, filename, 'png')
 end
 

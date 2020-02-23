@@ -27,7 +27,7 @@ surf(X,Y,reshape(Uatt, [gridy gridx]))
 %% Potencial repulsor
 radio_Obstaculo = 2;
 Obst = [10,10];
-Qstar = 1;
+Qstar = 0.5;
 eta = 1;
 dist_obst = pdist([Obst; XY]);
 D = dist_obst(1:XYrows)-(radio_Obstaculo+Qstar);

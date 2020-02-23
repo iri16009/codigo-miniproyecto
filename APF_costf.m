@@ -30,7 +30,7 @@ Uatt = 0.5.*xi.*(d <= dstar_goal).*(d.^2) + dstar_goal.*xi.*not(d <= dstar_goal)
 %% Potencial repulsor
 radio_Obstaculo = 2;
 Obst = [10,10];
-Qstar = 1;
+Qstar = 0.5;
 eta = 1;
 dist_obst = pdist([Obst; XY]);
 D = dist_obst(1:XYrows)-(radio_Obstaculo+Qstar);
